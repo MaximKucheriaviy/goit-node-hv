@@ -1,13 +1,29 @@
 const express = require('express')
+const dbModel = require('../../models/contacts');
 
 const router = express.Router()
 
 router.get('/', async (req, res, next) => {
-  res.json({ message: 'template message' })
+  try{
+    const contactList = await dbModel.listContacts();
+    res.json(contactList);
+  }
+  catch(err){
+    console.log(err);
+  }
 })
 
 router.get('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
+  try{
+    const result = await dbModel.getContactById(req.params.contactId);
+    if(!result){
+      next();
+    }
+    res.json(result);
+  }
+  catch(err){
+    console.log(err);
+  }
 })
 
 router.post('/', async (req, res, next) => {
