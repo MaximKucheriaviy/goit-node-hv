@@ -1,8 +1,14 @@
 const express = require('express')
 const logger = require('morgan')
 const cors = require('cors')
+const dotenv = require("dotenv");
+const mongoose = require("mongoose");
+
 
 const contactsRouter = require('./routes/api/contacts')
+
+dotenv.config();
+
 
 const app = express()
 
@@ -24,6 +30,18 @@ app.use((err, req, res, next) => {
     return;
   }
   res.status(500).json({ message: err.message })
+})
+
+
+mongoose.Promise = global.Promise;
+mongoose.set('strictQuery', false);
+mongoose.connect(process.env.DB_CONNECTION_DATA)
+.then(() => {
+  console.log("Database connection successful");
+})
+.catch(err => {
+  console.log("Connection error");
+  console.log(err);
 })
 
 module.exports = app

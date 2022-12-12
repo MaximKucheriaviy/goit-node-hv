@@ -1,18 +1,27 @@
 const express = require('express')
 const dbModel = require('../../models/contacts');
 const Joi = require("joi");
+const dbControllers = require("../../dbAtlas/controllers");
 
 const router = express.Router()
 
 const addBodySchema = Joi.object({
-  name: Joi.string().alphanum().min(3).trim().required(),
+  name: Joi.string().min(3).trim().required(),
   email: Joi.string().email().trim().required(),
   phone: Joi.string().min(3).trim().required(),
+  favorite: Joi.boolean().optional()
+})
+
+const putBodySchema = Joi.object({
+  name: Joi.string().min(3).trim().required(),
+  email: Joi.string().email().trim().required(),
+  phone: Joi.string().min(3).trim().required(),
+  favorite: Joi.boolean().required()
 })
 
 router.get('/', async (req, res, next) => {
   try{
-    const contactList = await dbModel.listContacts();
+    const contactList = await dbControllers.getAllContacts();
     res.json(contactList);
   }
   catch(err){
@@ -22,7 +31,7 @@ router.get('/', async (req, res, next) => {
 
 router.get('/:contactId', async (req, res, next) => {
   try{
-    const result = await dbModel.getContactById(req.params.contactId);
+    const result = await dbControllers.getContactById(req.params.contactId);
     if(!result){
       const err = new Error("Not found");
       err.status = 404;
@@ -43,7 +52,7 @@ router.post('/', async (req, res, next) => {
       err.status = 400;
       throw(err);
     }
-    const newContact = await dbModel.addContact(req.body);
+    const newContact = await dbControllers.createContact(req.body);
     if(!newContact){
       throw(new Error("add error"));
     }
@@ -57,7 +66,7 @@ router.post('/', async (req, res, next) => {
 
 router.delete('/:contactId', async (req, res, next) => {
   try{
-    const result = await dbModel.removeContact(req.params.contactId);
+    const result = await dbControllers.removeContact(req.params.contactId);
     if(!result){
       const err = new Error("Not found");
       err.status = 404;
@@ -73,13 +82,18 @@ router.delete('/:contactId', async (req, res, next) => {
 
 router.put('/:contactId', async (req, res, next) => {
   try{
-    const validation = addBodySchema.validate(req.body);
+    if(!req.body.hasOwnProperty("favorite")){
+      const err = new Error("missing field favorite");
+      err.status = 400;
+      throw(err);
+    }
+    const validation = putBodySchema.validate(req.body);
     if(validation.error){
       const err = new Error("missing fields");
       err.status = 400;
       throw(err);
     }
-    const result = await dbModel.updateContact(req.params.contactId, req.body);
+    const result = await dbControllers.updateContact(req.params.contactId, req.body);
     if(!result){
       const err = new Error("Not found");
       err.status = 404;
