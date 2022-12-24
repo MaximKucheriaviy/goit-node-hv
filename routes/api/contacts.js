@@ -1,5 +1,5 @@
 const express = require('express')
-const dbControllers = require("../../dbAtlas/userControllers");
+const dbControllers = require("../../dbAtlas/contactsControllers");
 const { addBodySchema, putBodySchema } = require("../../validation/validation");
 const router = express.Router()
 
