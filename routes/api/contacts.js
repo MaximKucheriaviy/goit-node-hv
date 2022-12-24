@@ -1,23 +1,9 @@
 const express = require('express')
-const dbModel = require('../../models/contacts');
-const Joi = require("joi");
-const dbControllers = require("../../dbAtlas/controllers");
-
+const dbControllers = require("../../dbAtlas/userControllers");
+const { addBodySchema, putBodySchema } = require("../../validation/validation");
 const router = express.Router()
 
-const addBodySchema = Joi.object({
-  name: Joi.string().min(3).trim().required(),
-  email: Joi.string().email().trim().required(),
-  phone: Joi.string().min(3).trim().required(),
-  favorite: Joi.boolean().optional()
-})
 
-const putBodySchema = Joi.object({
-  name: Joi.string().min(3).trim().required(),
-  email: Joi.string().email().trim().required(),
-  phone: Joi.string().min(3).trim().required(),
-  favorite: Joi.boolean().required()
-})
 
 router.get('/', async (req, res, next) => {
   try{
