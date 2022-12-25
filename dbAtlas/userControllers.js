@@ -1,5 +1,10 @@
 const User = require('./usersDBmodel');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { router } = require('../app');
+require('dotenv').config();
+
+const {JWT_KEYWORD} = process.env;
 
 
 const createUser = async (newUser) => {
@@ -19,6 +24,40 @@ const createUser = async (newUser) => {
     
 }
 
+const loginUser = async (userData) => {
+    try{
+        
+        const result = await User.findOne({
+            email: userData.email
+        })
+        if(!result || !bcrypt.compareSync(userData.password, result.password)){
+            throw(new Error);
+        }
+
+        const token = jwt.sign({
+            _id: result._id
+        }, JWT_KEYWORD);
+        await User.findByIdAndUpdate(result._id, {
+            token
+        })
+        return {
+            token,
+            user: {
+                email: result.email,
+                subscription: result.subscription
+            }
+        }
+    }
+    catch(err){
+        console.log(err);
+        err.status = 401;
+        err.message = "Email or password is wrong"
+        throw(err);
+    }
+}
+
+
 module.exports = {
-    createUser
+    createUser,
+    loginUser
 }

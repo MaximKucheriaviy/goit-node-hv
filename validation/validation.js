@@ -15,7 +15,7 @@ const putBodySchema = Joi.object({
   favorite: Joi.boolean().required()
 })
 
-const addUserSchema = Joi.object({
+const userDataSchema = Joi.object({
   email: Joi.string().email().trim().required(),
   password: Joi.string().min(3).trim().required()
 })
@@ -24,5 +24,5 @@ const addUserSchema = Joi.object({
   module.exports = {
     addBodySchema,
     putBodySchema,
-    addUserSchema
+    userDataSchema
   }

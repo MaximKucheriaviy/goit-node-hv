@@ -1,13 +1,13 @@
 const express = require('express');
-const { assert } = require('joi');
 const router = express.Router()
-const {addUserSchema} = require('../../validation/validation')
-const {createUser} = require("../../dbAtlas/userControllers");
+const {userDataSchema} = require('../../validation/validation')
+const {createUser, loginUser} = require("../../dbAtlas/userControllers");
+const auth = require('../../middleware/auth');
 
 
 router.post('/register', async (req, res, next) => {
     try{
-        const validation = addUserSchema.validate(req.body);
+        const validation = userDataSchema.validate(req.body);
         if(validation.error){
             const err = new Error(validation.error);
             err.status = 400;
@@ -24,6 +24,30 @@ router.post('/register', async (req, res, next) => {
     catch(err){
         next(err);
     }
+})
+
+router.get("/login", async (req, res, next) => {
+    try{
+        const validation = userDataSchema.validate(req.body);
+        if(validation.error){
+            const err = new Error(validation.error);
+            err.status = 400;
+            throw(err);
+        }
+        const result = await loginUser(req.body);
+        res.json({
+            result
+        })
+    }   
+    catch(err){
+        next(err);
+    }
+})
+
+router.post("/logout", auth, async (req, res) => {
+    res.json({
+        message: "OKOK"
+    })
 })
 
 
