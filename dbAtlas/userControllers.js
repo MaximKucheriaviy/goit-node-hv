@@ -67,9 +67,20 @@ const logoutUser = async (id) => {
     }
 }
 
+const getUserInfo = async (id) => {
+    try{
+        const result = User.findById(id);
+        return result;
+    }
+    catch(err){
+        throw(err);
+    }
+}
+
 
 module.exports = {
     createUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    getUserInfo
 }

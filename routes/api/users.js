@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router()
 const {userDataSchema} = require('../../validation/validation')
-const {createUser, loginUser, logoutUser} = require("../../dbAtlas/userControllers");
+const {createUser, loginUser, logoutUser, getUserInfo} = require("../../dbAtlas/userControllers");
 const auth = require('../../middleware/auth');
 
 
@@ -26,7 +26,7 @@ router.post('/register', async (req, res, next) => {
     }
 })
 
-router.get("/login", async (req, res, next) => {
+router.post("/login", async (req, res, next) => {
     try{
         const validation = userDataSchema.validate(req.body);
         if(validation.error){
@@ -44,9 +44,27 @@ router.get("/login", async (req, res, next) => {
     }
 })
 
-router.get("/logout", auth, async (req, res) => {
-    await logoutUser(req.id);
-    res.status(204).end();
+router.get("/logout", auth, async (req, res, next) => {
+    try{
+        await logoutUser(req.id);
+        res.status(204).end();
+    }
+    catch(err){
+        next(err);
+    }
+})
+
+router.get('/current', auth, async (req, res) => {
+    try{
+        const result = await getUserInfo(req.id);
+        res.json({
+            email: result.email,
+            subscription: result.subscription
+        })
+    }
+    catch(err){
+        next(err);
+    }
 })
 
 
