@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router()
 const {userDataSchema} = require('../../validation/validation')
-const {createUser, loginUser} = require("../../dbAtlas/userControllers");
+const {createUser, loginUser, logoutUser} = require("../../dbAtlas/userControllers");
 const auth = require('../../middleware/auth');
 
 
@@ -44,10 +44,9 @@ router.get("/login", async (req, res, next) => {
     }
 })
 
-router.post("/logout", auth, async (req, res) => {
-    res.json({
-        message: "OKOK"
-    })
+router.get("/logout", auth, async (req, res) => {
+    await logoutUser(req.id);
+    res.status(204).end();
 })
 
 

@@ -56,8 +56,20 @@ const loginUser = async (userData) => {
     }
 }
 
+const logoutUser = async (id) => {
+    try{
+        await User.findByIdAndUpdate(id, {
+            token: null
+        })
+    }
+    catch(err){
+        throw(err);
+    }
+}
+
 
 module.exports = {
     createUser,
-    loginUser
+    loginUser,
+    logoutUser
 }
