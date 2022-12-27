@@ -1,13 +1,17 @@
 const express = require('express')
 const dbControllers = require("../../dbAtlas/contactsControllers");
 const { addBodySchema, putBodySchema } = require("../../validation/validation");
-const router = express.Router()
+const router = express.Router();
+const auth = require('../../middleware/auth');
 
 
-
-router.get('/', async (req, res, next) => {
+router.get('/', auth, async (req, res, next) => {
   try{
-    const contactList = await dbControllers.getAllContacts();
+    const contactList = await dbControllers.getAllContacts({
+      owner: req.id,
+      page: req.query.page,
+      limit: req.query.limit,
+    });
     res.json(contactList);
   }
   catch(err){
@@ -15,9 +19,9 @@ router.get('/', async (req, res, next) => {
   }
 })
 
-router.get('/:contactId', async (req, res, next) => {
+router.get('/:contactId', auth, async (req, res, next) => {
   try{
-    const result = await dbControllers.getContactById(req.params.contactId);
+    const result = await dbControllers.getContactById(req.params.contactId, req.id);
     if(!result){
       const err = new Error("Not found");
       err.status = 404;
@@ -30,7 +34,7 @@ router.get('/:contactId', async (req, res, next) => {
   }
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', auth, async (req, res, next) => {
   try{
     const validation = addBodySchema.validate(req.body);
     if(validation.error){
@@ -38,7 +42,7 @@ router.post('/', async (req, res, next) => {
       err.status = 400;
       throw(err);
     }
-    const newContact = await dbControllers.createContact(req.body);
+    const newContact = await dbControllers.createContact(req.body,  req.id);
     if(!newContact){
       throw(new Error("add error"));
     }
@@ -50,7 +54,7 @@ router.post('/', async (req, res, next) => {
   
 })
 
-router.delete('/:contactId', async (req, res, next) => {
+router.delete('/:contactId', auth, async (req, res, next) => {
   try{
     const result = await dbControllers.removeContact(req.params.contactId);
     if(!result){
@@ -66,7 +70,7 @@ router.delete('/:contactId', async (req, res, next) => {
   
 })
 
-router.put('/:contactId', async (req, res, next) => {
+router.put('/:contactId', auth, async (req, res, next) => {
   try{
     if(!req.body.hasOwnProperty("favorite")){
       const err = new Error("missing field favorite");

@@ -1,8 +1,10 @@
 const {contactModel} = require("./contactsDBmodel");
+const User = require('./usersDBmodel');
 
-const getAllContacts = async () => {
+const getAllContacts = async (params) => {
+    const {owner, page, limit} = params;
     try{
-        const result = await contactModel.find();
+        const result = await contactModel.find({owner}).populate('owner', 'email').skip((page - 1) * limit).limit(Number(limit));
         return result;
     }
     catch(err){
@@ -11,9 +13,9 @@ const getAllContacts = async () => {
     
 }
 
-const getContactById = async (contactId) => {
+const getContactById = async (contactId, owner) => {
     try{
-        const result = await contactModel.find({_id: contactId});
+        const result = await contactModel.find({_id: contactId, owner});
         return result;
     }
     catch(err){
@@ -21,7 +23,7 @@ const getContactById = async (contactId) => {
     }
 }
 
-const createContact = async(newContact) => {
+const createContact = async(newContact, owner) => {
     try{
         const allList = await contactModel.find();
         if(allList.some(item => item.name === newContact.name)){
@@ -30,6 +32,7 @@ const createContact = async(newContact) => {
         if(!newContact.hasOwnProperty("favorite")){
             newContact.favorite = false;
         }
+        newContact.owner = owner;
         const result = await contactModel.create(newContact);
         return result;
     }
