@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router()
 const {userDataSchema} = require('../../validation/validation')
-const {createUser, loginUser, logoutUser, getUserInfo} = require("../../dbAtlas/userControllers");
+const {createUser, loginUser, logoutUser, getUserInfo, setSubscription} = require("../../dbAtlas/userControllers");
 const auth = require('../../middleware/auth');
 
 
@@ -54,13 +54,24 @@ router.get("/logout", auth, async (req, res, next) => {
     }
 })
 
-router.get('/current', auth, async (req, res) => {
+router.get('/current', auth, async (req, res, next) => {
     try{
         const result = await getUserInfo(req.id);
         res.json({
             email: result.email,
             subscription: result.subscription
         })
+    }
+    catch(err){
+        next(err);
+    }
+})
+
+
+router.patch('/', auth, async (req, res, next) => {
+    try{
+        await setSubscription(req.id, req.body. subscription);
+        res.status(201).end();
     }
     catch(err){
         next(err);

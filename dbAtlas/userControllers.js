@@ -76,10 +76,28 @@ const getUserInfo = async (id) => {
     }
 }
 
+const setSubscription = async(id, subscription) => {
+    const subTypes = ['starter', 'pro', 'business'];
+    try{
+        if(subTypes.every(item => item !== subscription)){
+            const err = new Error;
+            err.message = "wrong subscription type";
+            err.status = 400;
+            throw(err);
+        }
+        const result = User.findByIdAndUpdate(id, {subscription});
+        return result;
+    }
+    catch(err){
+        throw(err);
+    }
+}
+
 
 module.exports = {
     createUser,
     loginUser,
     logoutUser,
-    getUserInfo
+    getUserInfo,
+    setSubscription
 }
