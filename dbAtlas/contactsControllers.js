@@ -2,9 +2,16 @@ const {contactModel} = require("./contactsDBmodel");
 const User = require('./usersDBmodel');
 
 const getAllContacts = async (params) => {
-    const {owner, page, limit} = params;
+    const {owner, page, limit, favorite} = params;
+    const query = {owner}
+    if(favorite === "true"){
+        query.favorite = true;
+    }
+    else if(favorite === "false"){
+        query.favorite = false;
+    }
     try{
-        const result = await contactModel.find({owner}).populate('owner', 'email').skip((page - 1) * limit).limit(Number(limit));
+        const result = await contactModel.find(query).populate('owner', 'email').skip((page - 1) * limit).limit(Number(limit));
         return result;
     }
     catch(err){

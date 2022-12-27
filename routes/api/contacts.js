@@ -11,6 +11,7 @@ router.get('/', auth, async (req, res, next) => {
       owner: req.id,
       page: req.query.page,
       limit: req.query.limit,
+      favorite: req.query.favorite,
     });
     res.json(contactList);
   }
