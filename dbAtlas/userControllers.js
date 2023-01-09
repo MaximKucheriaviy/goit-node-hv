@@ -95,11 +95,25 @@ const setSubscription = async(id, subscription) => {
     }
 }
 
+const updateAvatar = async(id, path) => {
+    try{
+        const result = await User.findByIdAndUpdate(id, {
+            avatarURL: path
+        })
+        return result;
+    }
+    catch(err){
+        console.log("here");
+        throw err;
+    }
+}
+
 
 module.exports = {
     createUser,
     loginUser,
     logoutUser,
     getUserInfo,
-    setSubscription
+    setSubscription,
+    updateAvatar
 }
