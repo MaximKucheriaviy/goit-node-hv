@@ -1,21 +1,40 @@
-const {describe, expect, test} = require('@jest/globals');
-const validator = require('../validation/validation')
+const { describe, expect, test } = require('@jest/globals');
+const app = require('../app');
+const request = require('supertest');
+const mongoose = require('mongoose');
+require('dotenv').config()
+
+mongoose.Promise = global.Promise;
+mongoose.set('strictQuery', false);
+
 
 describe('login', () => {
-    beforeAll(() => {
-        console.log("this is before all");
-    })
-    test('validation check', () => {
-        const result = validator.userDataSchema.validate({
-            email: "maxim-k@i.ua",
-            password: "123212321"
+    beforeAll(async () => {
+        app.listen(3000, () => {
+            console.log("Server started");
         })
-        expect(result.error).toBeUndefined();
+        try {
+            await mongoose.connect(process.env.DB_CONNECTION_DATA);
+            console.log("Database connection successful");
+        }
+        catch (err) {
+            console.log("Connection error");
+            console.log(err);
+        }
     })
-    test('validation check', () => {
-        const result = validator.userDataSchema.validate({
-            email: "maxim-k@i.ua",
-        })
-        expect(result.error).not.toBeUndefined();
+    afterAll(async () => {
+        await mongoose.disconnect();
+    })
+
+    test('login test', async () => {
+        const response = await request(app).post("/users/login").send({
+            email: "maximandersen@gmail.com",
+            password: "12345"
+        });
+        const {token, user} = response.body.result;
+        expect(response.status).toBe(200);
+        expect(typeof token).toBe("string");
+        expect(typeof user.email).toBe("string");
+        expect(typeof user.subscription).toBe("string");
     })
 })
