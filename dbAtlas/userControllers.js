@@ -1,6 +1,7 @@
 const User = require('./usersDBmodel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const gravatar = require('gravatar');
 require('dotenv').config();
 
 const {JWT_KEYWORD} = process.env;
@@ -12,6 +13,7 @@ const createUser = async (newUser) => {
         const result = await User.create({
             email: newUser.email,
             password: hasedPassword,
+            avatarURL: gravatar.url(newUser.email),
         })
         return result;
     }
@@ -93,11 +95,25 @@ const setSubscription = async(id, subscription) => {
     }
 }
 
+const updateAvatar = async(id, path) => {
+    try{
+        const result = await User.findByIdAndUpdate(id, {
+            avatarURL: path
+        })
+        return result;
+    }
+    catch(err){
+        console.log("here");
+        throw err;
+    }
+}
+
 
 module.exports = {
     createUser,
     loginUser,
     logoutUser,
     getUserInfo,
-    setSubscription
+    setSubscription,
+    updateAvatar
 }
