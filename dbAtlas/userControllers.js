@@ -103,9 +103,28 @@ const updateAvatar = async(id, path) => {
         return result;
     }
     catch(err){
-        console.log("here");
         throw err;
     }
+}
+
+const verifyUser = async (token) => {
+    try{
+        const result = await User.findOne({verificationToken: token});
+        if(!result){
+            const err = new Error;
+            err.message = 'User not found';
+            err.status = 404;
+            throw err;
+        }
+        await User.findByIdAndUpdate(result._id, {
+            verificationToken: null,
+            verify: true
+        })
+    }
+    catch(err){
+        throw err;
+    }
+
 }
 
 
@@ -115,5 +134,6 @@ module.exports = {
     logoutUser,
     getUserInfo,
     setSubscription,
-    updateAvatar
+    updateAvatar,
+    verifyUser
 }

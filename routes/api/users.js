@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router()
 const {userDataSchema} = require('../../validation/validation')
-const {createUser, loginUser, logoutUser, getUserInfo, setSubscription, updateAvatar} = require("../../dbAtlas/userControllers");
+const {createUser, loginUser, logoutUser, getUserInfo, setSubscription, updateAvatar, verifyUser} = require("../../dbAtlas/userControllers");
 const auth = require('../../middleware/auth');
 const upload = require('../../middleware/upload');
 const jimp = require('jimp');
@@ -104,6 +104,18 @@ router.patch("/avatars", auth, upload.single('avatar'), async (req, res, next) =
         next(err);
     }
     
+})
+
+router.get('/verify/:verificationToken', async(req, res, next) => {
+    try {
+        const {verificationToken} = req.params();
+        await verifyUser(verificationToken);
+        res.json({
+            message: 'Verification successful'
+        })
+    } catch (error) {
+        next(error);
+    }
 })
 
 
