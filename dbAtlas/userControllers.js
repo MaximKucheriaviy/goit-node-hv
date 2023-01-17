@@ -2,6 +2,7 @@ const User = require('./usersDBmodel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const gravatar = require('gravatar');
+const {v4} = require('uuid');
 require('dotenv').config();
 
 const {JWT_KEYWORD} = process.env;
@@ -9,11 +10,13 @@ const {JWT_KEYWORD} = process.env;
 
 const createUser = async (newUser) => {
     try{
+        const verificationToken = v4();
         const hasedPassword = bcrypt.hashSync(newUser.password, bcrypt.genSaltSync());
         const result = await User.create({
             email: newUser.email,
             password: hasedPassword,
             avatarURL: gravatar.url(newUser.email),
+            verificationToken
         })
         return result;
     }

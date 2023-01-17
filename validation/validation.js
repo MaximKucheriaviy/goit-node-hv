@@ -20,9 +20,14 @@ const userDataSchema = Joi.object({
   password: Joi.string().min(3).trim().required()
 })
 
+const reverificationSchema = Joi.object({
+  email: Joi.string().email().trim().required(),
+})
+
 
   module.exports = {
     addBodySchema,
     putBodySchema,
-    userDataSchema
+    userDataSchema,
+    reverificationSchema
   }

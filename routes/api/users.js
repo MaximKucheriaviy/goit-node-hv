@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router()
-const {userDataSchema} = require('../../validation/validation')
+const {userDataSchema, reverificationSchema} = require('../../validation/validation')
 const {createUser, loginUser, logoutUser, getUserInfo, setSubscription, updateAvatar, verifyUser, setVerificationToken} = require("../../dbAtlas/userControllers");
 const auth = require('../../middleware/auth');
 const upload = require('../../middleware/upload');
@@ -21,6 +21,7 @@ router.post('/register', async (req, res, next) => {
             throw(err);
         }
         const result = await createUser(req.body);
+        await verifyMailer.sendVerifiMail(result.email, result.verificationToken);
         res.status(201).json({
             user:{
                 email: result.email,
@@ -122,6 +123,13 @@ router.get('/verify/:verificationToken', async(req, res, next) => {
 
 router.post('/verify', async(req, res, next) => {
     const {email} = req.body;
+    const result = reverificationSchema(req.body);
+    if(result.error){
+        const err = new Error;
+        err.status = 400;
+        err.message = "missing required field email";
+        throw err;
+    }
     const token = v4();
     try{
         await setVerificationToken(email, token);
