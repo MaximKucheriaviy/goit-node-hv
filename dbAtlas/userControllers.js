@@ -127,6 +127,22 @@ const verifyUser = async (token) => {
 
 }
 
+const setVerificationToken = async (email, token) => {
+    try{
+        const result = await User.findOne({email});
+        if(result.verify){
+            const err = new Error;
+            err.status = 400;
+            err.message = "Verification has already been passed";
+            throw err;
+        }
+        await User.findByIdAndUpdate(result._id, {verificationToken: token});
+    }
+    catch(err){
+        throw err;
+    }
+}
+
 
 module.exports = {
     createUser,
@@ -135,5 +151,6 @@ module.exports = {
     getUserInfo,
     setSubscription,
     updateAvatar,
-    verifyUser
+    verifyUser,
+    setVerificationToken,
 }

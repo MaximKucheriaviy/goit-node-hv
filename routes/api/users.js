@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router()
 const {userDataSchema} = require('../../validation/validation')
-const {createUser, loginUser, logoutUser, getUserInfo, setSubscription, updateAvatar, verifyUser} = require("../../dbAtlas/userControllers");
+const {createUser, loginUser, logoutUser, getUserInfo, setSubscription, updateAvatar, verifyUser, setVerificationToken} = require("../../dbAtlas/userControllers");
 const auth = require('../../middleware/auth');
 const upload = require('../../middleware/upload');
 const jimp = require('jimp');
 const path = require('path');
 const fs = require('fs/promises');
+const {v4} = require('uuid');
+const verifyMailer = require('../../services/verifiMailer');
 
 const avatarsPath = path.join(__dirname, "../../public/avatars/");
 
@@ -108,13 +110,26 @@ router.patch("/avatars", auth, upload.single('avatar'), async (req, res, next) =
 
 router.get('/verify/:verificationToken', async(req, res, next) => {
     try {
-        const {verificationToken} = req.params();
+        const {verificationToken} = req.params;
         await verifyUser(verificationToken);
         res.json({
             message: 'Verification successful'
         })
     } catch (error) {
         next(error);
+    }
+})
+
+router.post('/verify', async(req, res, next) => {
+    const {email} = req.body;
+    const token = v4();
+    try{
+        await setVerificationToken(email, token);
+        await verifyMailer.sendVerifiMail(email, token);
+        res.status(200).end();
+    }
+    catch(err){
+        next(err);
     }
 })
 

@@ -3,9 +3,21 @@ const sgMailer = require('@sendgrid/mail');
 require('dotenv').config();
 
 const {SEND_GRID_KEY} = process.env;
+sgMailer.setApiKey(SEND_GRID_KEY);
 
-const sendVerifiMail = (email, token) => {
-    
+const sendVerifiMail = async (email, token) => {
+    const mail = {
+        from: "maxim-k@i.ua",
+        to: email,
+        subject: "verification email",
+        html: createEmailText(token)
+    }
+    try{
+        await sgMailer.send(mail);
+    }
+    catch(err){
+        throw err;
+    }
 }
 
 
