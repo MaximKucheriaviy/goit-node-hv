@@ -2,6 +2,7 @@ const User = require('./usersDBmodel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const gravatar = require('gravatar');
+const {v4} = require('uuid');
 require('dotenv').config();
 
 const {JWT_KEYWORD} = process.env;
@@ -9,11 +10,13 @@ const {JWT_KEYWORD} = process.env;
 
 const createUser = async (newUser) => {
     try{
+        const verificationToken = v4();
         const hasedPassword = bcrypt.hashSync(newUser.password, bcrypt.genSaltSync());
         const result = await User.create({
             email: newUser.email,
             password: hasedPassword,
             avatarURL: gravatar.url(newUser.email),
+            verificationToken
         })
         return result;
     }
@@ -103,7 +106,42 @@ const updateAvatar = async(id, path) => {
         return result;
     }
     catch(err){
-        console.log("here");
+        throw err;
+    }
+}
+
+const verifyUser = async (token) => {
+    try{
+        const result = await User.findOne({verificationToken: token});
+        if(!result){
+            const err = new Error;
+            err.message = 'User not found';
+            err.status = 404;
+            throw err;
+        }
+        await User.findByIdAndUpdate(result._id, {
+            verificationToken: null,
+            verify: true
+        })
+    }
+    catch(err){
+        throw err;
+    }
+
+}
+
+const setVerificationToken = async (email, token) => {
+    try{
+        const result = await User.findOne({email});
+        if(result.verify){
+            const err = new Error;
+            err.status = 400;
+            err.message = "Verification has already been passed";
+            throw err;
+        }
+        await User.findByIdAndUpdate(result._id, {verificationToken: token});
+    }
+    catch(err){
         throw err;
     }
 }
@@ -115,5 +153,7 @@ module.exports = {
     logoutUser,
     getUserInfo,
     setSubscription,
-    updateAvatar
+    updateAvatar,
+    verifyUser,
+    setVerificationToken,
 }
